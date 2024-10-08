@@ -1,3 +1,7 @@
+// Team Members:
+// 1. Basith Abdul,  Campus id: 002838231
+// 2. Raviteja Girijala,  Campus id: 002847161
+
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -151,13 +155,13 @@ class _GameScreenState extends State<GameScreen>
 
   // Function to play background music in loop
   void _playBackgroundMusic() async {
-    await _audioPlayer.setReleaseMode(ReleaseMode.LOOP); // Ensure looping
-    await _audioPlayer.play('assets/scary_bgm.mp3');
+    await _audioPlayer.setReleaseMode(ReleaseMode.loop); // Ensure looping
+    await _audioPlayer.play('assets/scary_bgm.mp3' as Source);
   }
 
   // Function to play the congratulations alert sound
   void _playAlertMusic() async {
-    await _alertPlayer.play('assets/congratulations.mp3');
+    await _alertPlayer.play('assets/congratulations.mp3' as Source);
   }
 
   // Function to reset the game
