@@ -30,7 +30,7 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateMixin {
-  final List<String> _assets =  [
+  final List<String> _assets = [
     'assets/bat.jpg',
     'assets/ball.jpg',
     'assets/pumpkin.jpg',
@@ -83,7 +83,7 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
     'assets/ball.jpg',
     'assets/scary.jpg',
   ];
-
+  
   final List<Offset> _positions = [];
   final List<double> _rotations = [];
   final Random _random = Random();
@@ -148,6 +148,42 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
     await _audioPlayer.play('assets/scary_bgm.mp3');
   }
 
+  // Function to reset the game
+  void _resetGame() {
+    setState(() {
+      _positions.clear();
+      _rotations.clear();
+
+      // Re-initialize positions and rotations
+      for (int i = 0; i < _assets.length; i++) {
+        _positions.add(Offset(_getRandomXPosition(), _getRandomYPosition()));
+        _rotations.add(0.0);
+      }
+    });
+  }
+
+  // Function to show Congratulations dialog
+  void _showCongratulationsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Congratulations!'),
+          content: const Text('You clicked on the pumpkin!'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                _resetGame(); // Restart the game
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _timer.cancel();
@@ -179,12 +215,19 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
             return Positioned(
               left: _positions[index].dx,
               top: _positions[index].dy,
-              child: Transform.rotate(
-                angle: _rotations[index], // Apply rotation
-                child: Image.asset(
-                  asset,
-                  width: 50,
-                  height: 50,
+              child: GestureDetector(
+                onTap: () {
+                  if (asset.contains('pumpkin')) {
+                    _showCongratulationsDialog(); // Show the congratulations alert if pumpkin clicked
+                  }
+                },
+                child: Transform.rotate(
+                  angle: _rotations[index], // Apply rotation
+                  child: Image.asset(
+                    asset,
+                    width: 50,
+                    height: 50,
+                  ),
                 ),
               ),
             );
