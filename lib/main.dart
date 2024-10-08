@@ -29,7 +29,8 @@ class GameScreen extends StatefulWidget {
   _GameScreenState createState() => _GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateMixin {
+class _GameScreenState extends State<GameScreen>
+    with SingleTickerProviderStateMixin {
   final List<String> _assets = [
     'assets/bat.jpg',
     'assets/ball.jpg',
@@ -83,7 +84,7 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
     'assets/ball.jpg',
     'assets/scary.jpg',
   ];
-  
+
   final List<Offset> _positions = [];
   final List<double> _rotations = [];
   final Random _random = Random();
@@ -91,6 +92,9 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
 
   // AudioPlayer instance for background music
   final AudioPlayer _audioPlayer = AudioPlayer();
+  final AudioPlayer _backgroundPlayer = AudioPlayer();
+  final AudioPlayer _alertPlayer =
+      AudioPlayer(); // AudioPlayer instance for alert music
 
   @override
   void initState() {
@@ -127,14 +131,17 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
             // Ensure objects stay within the screen bounds
             if (_positions[i].dx < 0) {
               _positions[i] = Offset(0, _positions[i].dy);
-            } else if (_positions[i].dx > MediaQuery.of(context).size.width - 50) {
-              _positions[i] = Offset(MediaQuery.of(context).size.width - 50, _positions[i].dy);
+            } else if (_positions[i].dx >
+                MediaQuery.of(context).size.width - 50) {
+              _positions[i] = Offset(
+                  MediaQuery.of(context).size.width - 50, _positions[i].dy);
             }
-
             if (_positions[i].dy < 0) {
               _positions[i] = Offset(_positions[i].dx, 0);
-            } else if (_positions[i].dy > MediaQuery.of(context).size.height - 50) {
-              _positions[i] = Offset(_positions[i].dx, MediaQuery.of(context).size.height - 50);
+            } else if (_positions[i].dy >
+                MediaQuery.of(context).size.height - 50) {
+              _positions[i] = Offset(
+                  _positions[i].dx, MediaQuery.of(context).size.height - 50);
             }
           }
         });
@@ -146,6 +153,11 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
   void _playBackgroundMusic() async {
     await _audioPlayer.setReleaseMode(ReleaseMode.LOOP); // Ensure looping
     await _audioPlayer.play('assets/scary_bgm.mp3');
+  }
+
+  // Function to play the congratulations alert sound
+  void _playAlertMusic() async {
+    await _alertPlayer.play('assets/congratulations.mp3');
   }
 
   // Function to reset the game
@@ -164,6 +176,12 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
 
   // Function to show Congratulations dialog
   void _showCongratulationsDialog() {
+    // Stop the background music
+    _backgroundPlayer.pause();
+
+    // Play the congratulations music
+    _playAlertMusic();
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -174,7 +192,9 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
+                _alertPlayer.stop(); // Stop the alert music
                 _resetGame(); // Restart the game
+                _playBackgroundMusic(); // Resume the background music
               },
               child: const Text('OK'),
             ),
@@ -187,7 +207,8 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
   @override
   void dispose() {
     _timer.cancel();
-    _audioPlayer.stop(); // Stop the music when disposing the app
+    _backgroundPlayer.stop(); // Stop the music when disposing the app
+    _alertPlayer.dispose(); // Dispose the alert player
     super.dispose();
   }
 
@@ -232,7 +253,8 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
               ),
             );
           } else {
-            return const SizedBox.shrink(); // Return an empty widget if index is out of range
+            return const SizedBox
+                .shrink(); // Return an empty widget if index is out of range
           }
         }).toList(),
       ),
